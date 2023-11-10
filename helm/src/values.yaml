@@ -1,0 +1,75 @@
+# Default values for src.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/shift-python/y2023/homeworks/doncov-a/link-shortener/src
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "0.10.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  prometheus.io/port: "24404"
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/metrics/"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 24404
+  name: adontsov-servic-src-link
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+initContainers:
+  repository: registry.gitlab.com/shift-python/y2023/homeworks/doncov-a/link-shortener/init
+  pullPolicy: Always
+  tag: "0.11.0"
+  name: migrate
+
+app:
+  servicePort: "24404"
+  resources:
+    limits:
+      cpu: 200m
+      memory: "400Mi"
+  probes:
+    livenessPath: /healthz/up
+    readinessPath: /healthz/ready
+  data:
+    host: "0.0.0.0"
+    portsrc: "24404"
+    jager-host: "jaeger-agent.monitoring.svc.cluster.local"
+    jager-port: "6831"

@@ -1,0 +1,33 @@
+image: python:3.10-slim
+before_script:
+  - apt-get update
+  - apt install curl -y
+  - curl -sSL https://install.python-poetry.org | python3 -
+  - export PATH="/root/.local/bin:$PATH"
+  - poetry config virtualenvs.in-project false
+  - poetry config virtualenvs.create false
+  - poetry install
+
+services:
+  - postgres:12.2-alpine
+
+variables:
+  POSTGRES_DB: $POSTGRES_DB_TEST
+  POSTGRES_USER: $POSTGRES_USER
+  POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+  POSTGRES_HOST_AUTH_METHOD: trust
+
+
+stages:
+  - tests
+  - linter
+
+Tests:
+  stage: tests
+  script:
+    - pytest --cov src/tests
+
+Linter:
+  stage: linter
+  script:
+    - flake8 src/app
